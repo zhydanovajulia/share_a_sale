@@ -33,7 +33,7 @@ module ShareASale
     end
 
     def url
-      params = [['token', token], ['version', SHARE_A_SALE_VERSION], ['affiliateId', affiliateId], ['action', action], ['date', date.strftime("%D")]] + options.to_a
+      params = [['token', token], ['version', SHARE_A_SALE_VERSION], ['affiliateId', affiliateId], ['action', action], ['dateStart', date.strftime("%D")]] + options.to_a
       URI::HTTPS.build(host: SHARE_A_SALE_HOST, path: SHARE_A_SALE_PATH, query: URI.encode_www_form(params)).to_s
     end
 
