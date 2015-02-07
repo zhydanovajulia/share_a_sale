@@ -8,21 +8,18 @@ module ShareASale
   SHARE_A_SALE_PATH = "/w.cfm"
   SHARE_A_SALE_VERSION = "1.8"
 
-  class Client < Struct.new(:merchant_id, :token, :api_secret)
-    { banner_list: "bannerList", transaction_detail: "transactionDetail", reference: "reference" }.each do |method, api_action|
-      class_eval <<-EORUBY, __FILE__, __LINE__
-        def #{method}(options = {}, date = Time.now)
-          request('#{api_action}', options, date).execute!
-        end
-      EORUBY
+  class Client < Struct.new(:token, :api_secret)
+
+    def activity(options = {}, date = Time.now)
+      request('activity', options, date).execute!
     end
 
     def request(action, options, date = Time.now)
-      Request.new(merchant_id, token, api_secret, action, options, date)
+      Request.new(token, api_secret, action, options, date)
     end
   end
 
-  class Request < Struct.new(:merchant_id, :token, :api_secret, :action, :options, :date)
+  class Request < Struct.new(:token, :api_secret, :action, :options, :date)
     def date_string
       date.strftime("%a, %d %b %Y %H:%M:%S GMT")
     end
@@ -36,7 +33,7 @@ module ShareASale
     end
 
     def url
-      params = [['merchantId', merchant_id], ['token', token], ['version', SHARE_A_SALE_VERSION], ['action', action], ['date', date.strftime("%D")]] + options.to_a
+      params = [['token', token], ['version', SHARE_A_SALE_VERSION], ['action', action], ['date', date.strftime("%D")]] + options.to_a
       URI::HTTPS.build(host: SHARE_A_SALE_HOST, path: SHARE_A_SALE_PATH, query: URI.encode_www_form(params)).to_s
     end
 
