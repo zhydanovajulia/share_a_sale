@@ -8,18 +8,18 @@ module ShareASale
   SHARE_A_SALE_PATH = "/w.cfm"
   SHARE_A_SALE_VERSION = "1.8"
 
-  class Client < Struct.new(:token, :api_secret)
+  class Client < Struct.new(:token, :api_secret, :affiliateId)
 
     def activity(options = {}, date = Time.now)
       request('activity', options, date).execute!
     end
 
     def request(action, options, date = Time.now)
-      Request.new(token, api_secret, action, options, date)
+      Request.new(token, api_secret, action, affiliateId,  options, date)
     end
   end
 
-  class Request < Struct.new(:token, :api_secret, :action, :options, :date)
+  class Request < Struct.new(:token, :api_secret, :action, :affiliateId, :options, :date)
     def date_string
       date.strftime("%a, %d %b %Y %H:%M:%S GMT")
     end
@@ -33,7 +33,7 @@ module ShareASale
     end
 
     def url
-      params = [['token', token], ['version', SHARE_A_SALE_VERSION], ['action', action], ['date', date.strftime("%D")]] + options.to_a
+      params = [['token', token], ['version', SHARE_A_SALE_VERSION], ['affiliateId', affiliateId], ['action', action], ['date', date.strftime("%D")]] + options.to_a
       URI::HTTPS.build(host: SHARE_A_SALE_HOST, path: SHARE_A_SALE_PATH, query: URI.encode_www_form(params)).to_s
     end
 
