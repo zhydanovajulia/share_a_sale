@@ -10,18 +10,18 @@ module ShareASale
 
   class Client < Struct.new(:token, :api_secret, :affiliateId)
 
-    def activity(options = {}, date = Time.now)
-      request('activity', options, date).execute!
+    def activity(options = {}, date_start, date_end)
+      request('activity', options, date_start, date_end).execute!
     end
 
-    def request(action, options, date = Time.now)
-      Request.new(token, api_secret, action, affiliateId,  options, date)
+    def request(action, options, date_start, date_end)
+      Request.new(token, api_secret, action, affiliateId,  options, date_start, date_end)
     end
   end
 
-  class Request < Struct.new(:token, :api_secret, :action, :affiliateId, :options, :date)
+  class Request < Struct.new(:token, :api_secret, :action, :affiliateId, :options, :date_start, :date_end)
     def date_string
-      date.strftime("%a, %d %b %Y %H:%M:%S GMT")
+      date_start.strftime("%a, %d %b %Y %H:%M:%S GMT")
     end
 
     def string_to_hash
@@ -33,7 +33,7 @@ module ShareASale
     end
 
     def url
-      params = [['token', token], ['version', SHARE_A_SALE_VERSION], ['affiliateId', affiliateId], ['action', action], ['dateStart', date.strftime("%D")]] + options.to_a
+      params = [['token', token], ['version', SHARE_A_SALE_VERSION], ['affiliateId', affiliateId], ['action', action], ['dateStart', date_start.strftime("%D")], ['dateEnd', date_end.strftime("%D")]] + options.to_a
       URI::HTTPS.build(host: SHARE_A_SALE_HOST, path: SHARE_A_SALE_PATH, query: URI.encode_www_form(params)).to_s
     end
 
